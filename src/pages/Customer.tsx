@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Navigation, Phone, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Navigation, Phone, Settings, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import LocationInput from "@/components/LocationInput";
@@ -7,9 +9,29 @@ import RideCard from "@/components/RideCard";
 import heroImage from "@/assets/hero-image.jpg";
 
 const Customer = () => {
+  const { user, profile, signOut, loading } = useAuth();
+  const navigate = useNavigate();
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [selectedRide, setSelectedRide] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   const rideTypes = [
     {
@@ -67,11 +89,18 @@ const Customer = () => {
             </h1>
           </div>
           <div className="flex items-center space-x-2">
+            <span className="text-sm text-muted-foreground mr-2">
+              Welcome, {profile?.full_name}
+            </span>
             <Button variant="ghost" size="icon">
               <Phone className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon">
               <Settings className="h-5 w-5" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={signOut}>
+              <LogOut className="h-4 w-4 mr-1" />
+              Sign Out
             </Button>
           </div>
         </div>
